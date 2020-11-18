@@ -15,7 +15,8 @@ import (
 var (
 	OidGets     map[string]GetOID    = make(map[string]GetOID)
 	Types       map[interface{}]Type = make(map[interface{}]Type)
-	listHandler *ListHandler         = &ListHandler{}
+	listHandler                      = &ListHandler{}
+	RootOids    map[string]struct{}  = make(map[string]struct{})
 )
 
 func init() {
@@ -49,20 +50,29 @@ func NoSuchInstance(oid value.OID) (value.OID, pdu.VariableType, interface{}, er
 	return nil, pdu.VariableTypeNoSuchObject, nil, nil
 }
 
+//AddRootOid RT
+func AddRootOid(rootOid string) {
+	RootOids[rootOid] = struct{}{}
+}
+
 //RegisterModules register module
 func RegisterModules(session *agentx.Session) {
 	fmt.Println("load...")
 	session.Handler = listHandler
-
-	if err := session.Register(127, value.MustParseOID("1.3.6.1.4.1.45995.3")); err != nil {
-		log.Fatalf("%s", err)
+	fmt.Print(RootOids)
+	for oid := range RootOids {
+		fmt.Printf("Register Root Oid: %s\n", oid)
+		if err := session.Register(127, value.MustParseOID(oid)); err != nil {
+			log.Fatalf("%s", err)
+		}
 	}
 
 }
 
-func RegisterCounter32(oid string, call GetOID) {
+//RegisterOid RT
+func RegisterOid(oid string, call GetOID, pduType pdu.VariableType) {
 	item := listHandler.Add(oid)
-	item.Type = pdu.VariableTypeCounter32
+	item.Type = pduType
 	OidGets[oid] = call
 }
 

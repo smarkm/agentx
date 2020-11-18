@@ -20,9 +20,10 @@ type Node struct {
 }
 
 type Module struct {
-	GoName string
-	Mib    string
-	Oids   map[string]Node
+	GoName  string
+	Mib     string
+	RootOid string
+	Oids    map[string]Node
 }
 
 //LoadAndGenerateCode RT
@@ -39,13 +40,20 @@ func LoadAndGenerateCode(path, mib string, dryRun bool) {
 	fmt.Printf("loading mib: %s, success\n", mib)
 	for _, m := range loadedModules {
 		if m.Name == mib {
-			nodes := m.GetNodes(types.NodeScalar)
+			nodes := m.GetNodes(types.NodeAny)
+			rootOid := nodes[0].Oid.String()
+			fmt.Println(rootOid)
+			nodes = m.GetNodes(types.NodeScalar)
 			fileName := strings.ReplaceAll(m.Name, "-", "_")
-			tm := Module{Mib: m.Name, GoName: fileName, Oids: make(map[string]Node)}
+			tm := Module{Mib: m.Name, GoName: fileName, RootOid: rootOid, Oids: make(map[string]Node)}
 			for _, n := range nodes {
+				oid := n.Oid.String()
 				vType, goType := CoverGosmiTyp2PduType(n.Type)
+				if n.Kind == types.NodeScalar {
+					oid = oid + ".0"
+				}
 				fmt.Println(n.Name, n.Oid, n.Type, vType, goType)
-				tm.Oids[n.Name] = Node{Name: n.Name, Oid: n.Oid.String(), Type: vType.String(), GoType: goType}
+				tm.Oids[n.Name] = Node{Name: n.Name, Oid: oid, Type: vType.String(), GoType: goType}
 			}
 			GenerateFiles(tm, dryRun)
 

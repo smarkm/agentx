@@ -1,3 +1,4 @@
 /module
-!/module/common.go
+!module/common.go
+!/module/AGENTX_MIB.go
 agentx.code-workspace

@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "/go/src/github.com/posteo/go-agentx"
+		},
+		{
+			"path": "/go/src/github.com/smarkm/mibtool"
+		},
+		{
+			"path": "/go/src/github.com/smarkm/gosmi"
+		}
+	],
+	"settings": {}
+}

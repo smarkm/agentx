@@ -12,9 +12,10 @@ func init() {
 	var Mib *{{.GoName}} = &{{.GoName}}{}
     
     {{range $v := .Oids }}
-	core.RegisterCounter32( "{{.Oid}}", Mib.get{{.Name}})
+	core.RegisterOid( "{{.Oid}}", Mib.get{{.Name}},pdu.{{.Type}})
     {{end}}
-	fmt.Printf("register ifMib ...\n")
+	core.AddRootOid("{{.RootOid}}")
+	fmt.Printf("register {{.Mib}}: {{.RootOid}} ...\n")
 
 }
 //{{.GoName}} code for MIB: {{.Mib}}

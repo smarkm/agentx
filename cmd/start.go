@@ -17,6 +17,7 @@ package cmd
 
 import (
 	"agentx/core"
+	"agentx/module"
 	"log"
 	"time"
 
@@ -38,6 +39,7 @@ var startCmd = &cobra.Command{
 		client.ReconnectInterval = 1 * time.Second
 
 		session, err := client.Session()
+		module.Init()
 		core.RegisterModules(session)
 		time.Sleep(3 * time.Minute)
 	},
