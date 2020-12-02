@@ -12,20 +12,6 @@ import (
 	"github.com/sleepinggenius2/gosmi/types"
 )
 
-type Node struct {
-	Name   string
-	Oid    string
-	Type   string
-	GoType string
-}
-
-type Module struct {
-	GoName  string
-	Mib     string
-	RootOid string
-	Oids    map[string]Node
-}
-
 //LoadAndGenerateCode RT
 func LoadAndGenerateCode(path, mib string, dryRun bool) {
 	gosmi.Init()
@@ -40,12 +26,16 @@ func LoadAndGenerateCode(path, mib string, dryRun bool) {
 	fmt.Printf("loading mib: %s, success\n", mib)
 	for _, m := range loadedModules {
 		if m.Name == mib {
+			//Find root OID
 			nodes := m.GetNodes(types.NodeAny)
 			rootOid := nodes[0].Oid.String()
-			fmt.Println(rootOid)
+			fmt.Printf("Root OID: %s\n", rootOid)
+
+			//Find Node Scalar
 			nodes = m.GetNodes(types.NodeScalar)
+			nodes = append(nodes, m.GetNodes(types.NodeColumn)...)
 			fileName := strings.ReplaceAll(m.Name, "-", "_")
-			tm := Module{Mib: m.Name, GoName: fileName, RootOid: rootOid, Oids: make(map[string]Node)}
+			tm := Module{Mib: m.Name, GoName: fileName, RootOid: rootOid, Oids: make(map[string]VarBind)}
 			for _, n := range nodes {
 				oid := n.Oid.String()
 				vType, goType := CoverGosmiTyp2PduType(n.Type)
@@ -53,8 +43,10 @@ func LoadAndGenerateCode(path, mib string, dryRun bool) {
 					oid = oid + ".0"
 				}
 				fmt.Println(n.Name, n.Oid, n.Type, vType, goType)
-				tm.Oids[n.Name] = Node{Name: n.Name, Oid: oid, Type: vType.String(), GoType: goType}
+				tm.Oids[n.Name] = VarBind{Name: n.Name, Oid: oid, Type: vType.String(), GoType: goType}
 			}
+
+			//sort.Sort(tm.Oids)
 			GenerateFiles(tm, dryRun)
 
 		}
