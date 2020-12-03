@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -35,7 +36,7 @@ func LoadAndGenerateCode(path, mib string, dryRun bool) {
 			nodes = m.GetNodes(types.NodeScalar)
 			nodes = append(nodes, m.GetNodes(types.NodeColumn)...)
 			fileName := strings.ReplaceAll(m.Name, "-", "_")
-			tm := Module{Mib: m.Name, GoName: fileName, RootOid: rootOid, Oids: make(map[string]VarBind)}
+			tm := Module{Mib: m.Name, GoName: fileName, RootOid: rootOid, Oids: make([]VarBind, 0)}
 			for _, n := range nodes {
 				oid := n.Oid.String()
 				vType, goType := CoverGosmiTyp2PduType(n.Type)
@@ -43,10 +44,11 @@ func LoadAndGenerateCode(path, mib string, dryRun bool) {
 					oid = oid + ".0"
 				}
 				fmt.Println(n.Name, n.Oid, n.Type, vType, goType)
-				tm.Oids[n.Name] = VarBind{Name: n.Name, Oid: oid, Type: vType.String(), GoType: goType}
+				vb := VarBind{Name: n.Name, Oid: oid, Type: vType.String(), GoType: goType}
+				tm.Oids = append(tm.Oids, vb)
 			}
 
-			//sort.Sort(tm.Oids)
+			sort.Sort(SortByOID(tm.Oids))
 			GenerateFiles(tm, dryRun)
 
 		}
