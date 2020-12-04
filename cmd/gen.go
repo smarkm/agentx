@@ -26,6 +26,7 @@ var (
 	MibPath string
 	Mib     string
 	DryRun  bool
+	Info    bool
 )
 
 // genCmd represents the gen command
@@ -40,7 +41,8 @@ var genCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(genCmd)
-	genCmd.Flags().StringVarP(&MibPath, "path", "p", "mibs", "Mib path")
-	genCmd.Flags().StringVarP(&Mib, "mib", "m", "", "Loading mib,if no setting will load all under mib path")
-	genCmd.Flags().BoolVarP(&DryRun, "dry-run", "d", false, "Dry run will not generate file")
+	genCmd.Flags().StringVarP(&MibPath, "path", "p", "mibs", "mib path")
+	genCmd.Flags().StringVarP(&Mib, "mib", "m", "", "moading mib,if no setting will load all under mib path")
+	genCmd.Flags().BoolVarP(&DryRun, "dry-run", "d", false, "dry run will not generate file")
+	genCmd.Flags().BoolVarP(&Info, "info-oid", "i", false, "print raw oid informaton from mib")
 }

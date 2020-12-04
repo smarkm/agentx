@@ -14,7 +14,7 @@ import (
 )
 
 //LoadAndGenerateCode RT
-func LoadAndGenerateCode(path, mib string, dryRun bool) {
+func LoadAndGenerateCode(path, mib string, dryRun, printOidInfo bool) {
 	gosmi.Init()
 	gosmi.AppendPath(path)
 	_, err := gosmi.LoadModule(mib)
@@ -43,7 +43,9 @@ func LoadAndGenerateCode(path, mib string, dryRun bool) {
 				if n.Kind == types.NodeScalar {
 					oid = oid + ".0"
 				}
-				fmt.Println(n.Name, n.Oid, n.Type, vType, goType)
+				if printOidInfo {
+					fmt.Println(n.Name, n.Oid, n.Type, vType, goType)
+				}
 				vb := VarBind{Name: n.Name, Oid: oid, Type: vType.String(), GoType: goType}
 				tm.Oids = append(tm.Oids, vb)
 			}
